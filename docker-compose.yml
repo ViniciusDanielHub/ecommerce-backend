@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: ecommerce-backend
+    ports:
+      - "3000:3000"   # NestJS API
+      - "5555:5555"   # Prisma Studio
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    networks:
+      - ecommerce-net
+
+  db:
+    image: postgres:15
+    container_name: ecommerce-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommerce
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - ecommerce-net
+
+volumes:
+  pgdata:
+
+networks:
+  ecommerce-net:
+    driver: bridge
