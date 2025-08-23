@@ -11,9 +11,10 @@ import { DeleteProductUseCase } from './use-cases/delete-product.use-case';
 import { PrismaProductRepository } from 'src/infrastructure/products/prisma/prisma-product.repository';
 import { PRODUCT_REPOSITORY } from './repositories/product.repository';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
+import { SystemConfigModule } from 'src/shared/modules/system-config.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, SystemConfigModule],
   controllers: [ProductController],
   providers: [
     PrismaService,

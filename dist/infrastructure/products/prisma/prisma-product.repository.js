@@ -12,15 +12,43 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaProductRepository = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../../shared/prisma/prisma.service");
+const system_config_service_1 = require("../../../shared/services/system-config.service");
 let PrismaProductRepository = class PrismaProductRepository {
-    constructor(prisma) {
+    constructor(prisma, systemConfigService) {
         this.prisma = prisma;
+        this.systemConfigService = systemConfigService;
+    }
+    // NOVO MÉTODO para criar loja padrão
+    async createDefaultStore(userId) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { name: true, email: true }
+        });
+        if (!user) {
+            throw new Error('Usuário não encontrado');
+        }
+        const defaultStoreName = await this.systemConfigService.getDefaultStoreName();
+        const storeName = defaultStoreName;
+        const storeSlug = `loja-${userId}-${Date.now()}`;
+        return this.prisma.store.create({
+            data: {
+                name: storeName,
+                slug: storeSlug,
+                description: `Loja oficial de ${user.name}`,
+                ownerId: userId,
+                isActive: true
+            }
+        });
     }
     async create(data) {
         const { images, variants, ...productData } = data;
+        if (!productData.storeId) {
+            throw new Error('storeId é obrigatório para criar um produto');
+        }
         return this.prisma.product.create({
             data: {
                 ...productData,
+                storeId: productData.storeId,
                 images: images ? {
                     create: images
                 } : undefined,
@@ -32,7 +60,14 @@ let PrismaProductRepository = class PrismaProductRepository {
                 images: true,
                 variants: true,
                 category: true,
-                store: false,
+                store: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        logo: true
+                    }
+                },
             }
         });
     }
@@ -49,10 +84,10 @@ let PrismaProductRepository = class PrismaProductRepository {
                 category: true,
                 store: {
                     select: {
-                        id: false,
-                        name: false,
-                        slug: false,
-                        logo: false
+                        id: true,
+                        name: true,
+                        slug: true,
+                        logo: true
                     }
                 },
                 reviews: {
@@ -89,10 +124,10 @@ let PrismaProductRepository = class PrismaProductRepository {
                 category: true,
                 store: {
                     select: {
-                        id: false,
-                        name: false,
-                        slug: false,
-                        logo: false
+                        id: true,
+                        name: true,
+                        slug: true,
+                        logo: true
                     }
                 }
             }
@@ -147,9 +182,9 @@ let PrismaProductRepository = class PrismaProductRepository {
                     },
                     store: {
                         select: {
-                            id: false,
-                            name: false,
-                            slug: false
+                            id: true,
+                            name: true,
+                            slug: true
                         }
                     },
                     _count: {
@@ -245,6 +280,7 @@ let PrismaProductRepository = class PrismaProductRepository {
 exports.PrismaProductRepository = PrismaProductRepository;
 exports.PrismaProductRepository = PrismaProductRepository = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        system_config_service_1.SystemConfigService])
 ], PrismaProductRepository);
 //# sourceMappingURL=prisma-product.repository.js.map

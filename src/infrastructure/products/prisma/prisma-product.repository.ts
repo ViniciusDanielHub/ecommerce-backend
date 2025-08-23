@@ -8,24 +8,29 @@ import {
   PaginationOptions
 } from 'src/core/products/repositories/product.repository';
 import { Prisma } from '@prisma/client';
+import { SystemConfigService } from 'src/shared/services/system-config.service';
 
 @Injectable()
 export class PrismaProductRepository implements IProductRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService,
+  private readonly systemConfigService: SystemConfigService
+  ) { }
 
   // NOVO MÉTODO para criar loja padrão
   async createDefaultStore(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { name: true, email: true }
+      select: { name: true, email: true}
     });
 
     if (!user) {
       throw new Error('Usuário não encontrado');
     }
 
-    const storeName = `Loja de ${user.name}`;
-    const storeSlug = `loja-${user.email.split('@')[0]}-${Date.now()}`;
+    const defaultStoreName = await this.systemConfigService.getDefaultStoreName();
+
+    const storeName = defaultStoreName;
+    const storeSlug = `loja-${userId}-${Date.now()}`;
 
     return this.prisma.store.create({
       data: {
@@ -296,4 +301,5 @@ export class PrismaProductRepository implements IProductRepository {
 
     return !!product;
   }
+  
 }

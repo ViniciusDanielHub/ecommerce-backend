@@ -70,5 +70,5 @@ export interface IProductRepository {
   findByStore(storeId: string, pagination: PaginationOptions): Promise<any>;
   updateStock(productId: string, quantity: number): Promise<any>;
   checkSlugExists(slug: string, excludeId?: string): Promise<boolean>;
-  createDefaultStore(userId: string): Promise<any>; // NOVO MÉTODO
+  createDefaultStore(userId: string): Promise<any>; 
 }
