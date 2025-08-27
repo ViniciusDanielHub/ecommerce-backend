@@ -13,12 +13,18 @@ const users_module_1 = require("../core/users/users.module");
 const admin_module_1 = require("../core/admin/admin.module");
 const product_module_1 = require("../core/products/product.module");
 const app_controller_1 = require("./app.controller");
+const shared_module_1 = require("../shared/modules/shared.module");
+const static_files_middleware_1 = require("../shared/middlewares/static-files.middleware");
 let AppModule = class AppModule {
+    configure(consumer) {
+        consumer.apply(static_files_middleware_1.StaticFilesMiddleware).forRoutes('*');
+    }
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            shared_module_1.SharedModule,
             auth_module_1.AuthModule,
             users_module_1.UsersModule,
             admin_module_1.AdminModule,

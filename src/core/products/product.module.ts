@@ -12,13 +12,16 @@ import { PrismaProductRepository } from 'src/infrastructure/products/prisma/pris
 import { PRODUCT_REPOSITORY } from './repositories/product.repository';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
 import { SystemConfigModule } from 'src/shared/modules/system-config.module';
+import { UploadModule } from 'src/shared/modules/upload.module';
+import { CreateProductWithUploadUseCase } from './use-cases/create-product-with-upload.use-case';
 
 @Module({
-  imports: [AuthModule, SystemConfigModule],
+  imports: [AuthModule, SystemConfigModule, UploadModule],
   controllers: [ProductController],
   providers: [
     PrismaService,
     CreateProductUseCase,
+    CreateProductWithUploadUseCase,
     GetProductUseCase,
     GetProductsUseCase,
     UpdateProductUseCase,

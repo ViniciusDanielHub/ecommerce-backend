@@ -11,6 +11,7 @@ import { Roles } from 'src/shared/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { SystemConfigService } from 'src/shared/services/system-config.service';
 import { UpdateDefaultStoreNameDto } from '../dtos/update-default-store-name.dto';
+import { UpdateUploadConfigDto } from '../dtos/update-upload-config.dto';
 
 @Controller('admin/config')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -34,6 +35,34 @@ export class SystemConfigController {
     return {
       message: 'Nome padrão da loja atualizado com sucesso',
       defaultStoreName: dto.defaultStoreName
+    };
+  }
+  @Get('upload')
+  async getUploadConfig() {
+    const [provider, maxFileSize, allowedFormats] = await Promise.all([
+      this.systemConfigService.getUploadProvider(),
+      this.systemConfigService.getUploadMaxFileSize(),
+      this.systemConfigService.getUploadAllowedFormats()
+    ]);
+
+    return {
+      provider,
+      maxFileSize,
+      allowedFormats
+    };
+  }
+
+  @Post('upload')
+  async updateUploadConfig(@Body() dto: UpdateUploadConfigDto) {
+    await Promise.all([
+      this.systemConfigService.setUploadProvider(dto.provider),
+      this.systemConfigService.setUploadMaxFileSize(dto.maxFileSize),
+      this.systemConfigService.setUploadAllowedFormats(dto.allowedFormats)
+    ]);
+
+    return {
+      message: 'Configurações de upload atualizadas com sucesso',
+      config: dto
     };
   }
 }
